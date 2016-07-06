@@ -13,36 +13,26 @@ class TokensMigration
   down: (callback) =>
     callback()
 
-  _convertDevice: ({ uuid, meshblu, token }, callback) =>
+  _convertDevice: ({ uuid, meshblu }, callback) =>
     { tokens, createdAt }= meshblu
     newTokens = []
     _.each tokens, (metadata, hashedToken) =>
+      metadata.createdAt ?= createdAt
       newTokens.push {
         uuid,
         hashedToken,
         metadata,
       }
+
     async.eachSeries newTokens, @_saveToken, (error) =>
       return callback error if error?
-      @_convertRootToken { uuid, token, createdAt }, (error) =>
-        return callback error if error?
-        @_removeFromDevice { uuid }, callback
-
-  _convertRootToken: ({ uuid, token, createdAt }, callback) =>
-    tokenRecord = {
-      uuid,
-      hashedRootToken: token,
-      metadata: {
-        createdAt
-      }
-    }
-    @_saveToken tokenRecord, callback
+      @_removeFromDevice { uuid }, callback
 
   _saveToken: (tokenRecord, callback) =>
     @tokens.insert tokenRecord, callback
 
   _removeFromDevice: ({ uuid }, callback) =>
-    query = { $unset: {  "meshblu.tokens": true, token: true }}
+    query = { $unset: {  'meshblu.tokens': true }}
     @devices.update { uuid }, query, callback
 
 module.exports = TokensMigration
