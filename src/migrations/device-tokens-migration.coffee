@@ -2,7 +2,7 @@ _            = require 'lodash'
 async        = require 'async'
 MongoForEach = require '../helpers/mongo-for-each'
 
-class TokensMigration
+class DeviceTokensMigration
   constructor: ({ database }) ->
     @devices = database.collection 'devices'
     @tokens = database.collection 'tokens'
@@ -17,19 +17,7 @@ class TokensMigration
       mongoForEach.do query, projection, callback
 
   down: (callback) =>
-    query = { 'uuid': $exists: true }
-    mongoForEach = new MongoForEach({ collection: @tokens, taskFn: @_convertToken })
-    mongoForEach.do query, { _id: false }, callback
-
-  _convertToken: ({ uuid, hashedToken, metadata }, callback) =>
-    updateQuery = {
-      $set: {
-        "meshblu.tokens.#{hashedToken}": metadata
-      }
-    }
-    @devices.update { uuid }, updateQuery, (error) =>
-      return callback error if error?
-      @tokens.remove { uuid, hashedToken }, callback
+    callback new Error 'down not supported'
 
   _convertDevice: ({ uuid, meshblu }, callback) =>
     { tokens, createdAt }= meshblu
@@ -42,15 +30,9 @@ class TokensMigration
         metadata,
       }
 
-    async.eachSeries newTokens, @_saveToken, (error) =>
-      return callback error if error?
-      @_removeFromDevice { uuid }, callback
+    async.eachSeries newTokens, @_saveToken, callback
 
   _saveToken: (tokenRecord, callback) =>
     @tokens.insert tokenRecord, callback
 
-  _removeFromDevice: ({ uuid }, callback) =>
-    query = { $unset: {  'meshblu.tokens': true }}
-    @devices.update { uuid }, query, callback
-
-module.exports = TokensMigration
+module.exports = DeviceTokensMigration

@@ -1,0 +1,14 @@
+[
+  {
+    uuid: 'hello'
+    token: 'this-should-exist'
+    meshblu:
+      createdAt: 'Tue Jul 05 2001 23:13:19 GMT-0700 (MST)'
+  }
+  {
+    uuid: 'oh-boy'
+    token: 'this-should-exist'
+    meshblu:
+      createdAt: 'Tue Jul 05 2001 23:13:19 GMT-0700 (MST)'
+  }
+]

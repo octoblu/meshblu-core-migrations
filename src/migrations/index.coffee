@@ -1,3 +1,4 @@
 module.exports = {
-  tokens: require './tokens-migration'
+  'device-tokens': require './device-tokens-migration'
+  'remove-device-tokens': require './remove-device-tokens-migration'
 }
