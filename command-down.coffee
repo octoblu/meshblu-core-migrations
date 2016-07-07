@@ -23,7 +23,7 @@ OPTIONS = [
   },
 ]
 
-class CommandUp
+class RunMigration
   constructor: (@argv) ->
     @parser = dashdash.createParser options: OPTIONS
 
@@ -45,9 +45,9 @@ class CommandUp
     process.exit 1
 
   printHelp: ({help, name, mongodb_uri}) =>
-    console.log "usage: ./command-up.js [options]\n"
+    console.log "usage: ./command-down.js [options]\n"
     console.log "options:\n"
-    console.log @parser.help(includeEnv: true)
+    console.log @parser.help {includeEnv: true}
     process.exit 0 if help
 
     console.log colors.red '  -m, --mongodb-uri is required' unless mongodb_uri
@@ -60,8 +60,8 @@ class CommandUp
     Migration = migrations[name]
     @fatalMessage "Invalid Migration #{name}" unless Migration?
     migration = new Migration {database}
-    migration.up (error) =>
+    migration.down (error) =>
       @fatalError error if error?
       console.log colors.green 'Successfully ran'
 
-module.exports = CommandUp
+module.exports = RunMigration
