@@ -39,8 +39,9 @@ class CommandList
 
   run: =>
     names = _.keys migrations
-    return console.error colors.red 'No migrations' if _.isEmpty migrations
+    return @fatalMessage 'No migrations' if _.isEmpty migrations
     _.each names, (name) =>
       console.log name
+    process.exit 0
 
 module.exports = CommandList

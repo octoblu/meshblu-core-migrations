@@ -62,6 +62,7 @@ class CommandUp
     migration = new Migration {database}
     migration.up (error) =>
       @fatalError error if error?
-      console.log colors.green 'Successfully ran'
+      console.log colors.green 'it has been done'
+      process.exit 0
 
 module.exports = CommandUp
