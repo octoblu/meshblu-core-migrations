@@ -1,4 +1,4 @@
-module.exports = [
+[
   {
     uuid: 'hello'
     hashedToken: 'this-is-something-awesome'

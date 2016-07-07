@@ -1,17 +1,35 @@
-_     = require 'lodash'
-async =  require 'async'
+_            = require 'lodash'
+async        = require 'async'
+MongoForEach = require '../helpers/mongo-for-each'
 
 class TokensMigration
-  constructor: ({ datastores }) ->
-    { @devices, @tokens } = datastores
+  constructor: ({ database }) ->
+    @devices = database.collection 'devices'
+    @tokens = database.collection 'tokens'
 
   up: (callback) =>
-    query = { 'meshblu.tokens': $exists: true }
-    @devices.find query, (error, devices) =>
-      async.eachSeries devices, @_convertDevice, callback
+    @tokens.ensureIndex { uuid: -1, hashedToken: -1 }, (error) =>
+      return callback error if error?
+      query = { 'meshblu.tokens': $exists: true }
+      projection = { uuid: true, 'meshblu': true, token: true }
+
+      mongoForEach = new MongoForEach({ collection: @devices, taskFn: @_convertDevice })
+      mongoForEach.do query, projection, callback
 
   down: (callback) =>
-    callback()
+    query = { 'uuid': $exists: true }
+    mongoForEach = new MongoForEach({ collection: @tokens, taskFn: @_convertToken })
+    mongoForEach.do query, { _id: false }, callback
+
+  _convertToken: ({ uuid, hashedToken, metadata }, callback) =>
+    updateQuery = {
+      $set: {
+        "meshblu.tokens.#{hashedToken}": metadata
+      }
+    }
+    @devices.update { uuid }, updateQuery, (error) =>
+      return callback error if error?
+      @tokens.remove { uuid, hashedToken }, callback
 
   _convertDevice: ({ uuid, meshblu }, callback) =>
     { tokens, createdAt }= meshblu

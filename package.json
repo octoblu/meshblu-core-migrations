@@ -28,6 +28,9 @@
   },
   "dependencies": {
     "async": "^2.0.0-rc.6",
+    "colors": "^1.1.2",
+    "dashdash": "^1.14.0",
+    "fs-cson": "^0.3.2",
     "lodash": "^4.13.1",
     "meshblu-core-datastore": "^4.6.0",
     "meshblu-core-manager-token": "^5.1.0",
