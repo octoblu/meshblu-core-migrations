@@ -10,10 +10,12 @@ class RemoveDeviceTokensMigration
   up: (callback) =>
     query = { 'meshblu.tokens': $exists: true }
     projection = { uuid: true, 'meshblu': true, token: true }
+    updateQuery = { $unset: {  'meshblu.tokens': true }}
 
-    mongoForEach = new MongoForEach({ collection: @devices })
-    mongoForEach.find query, projection
-    mongoForEach.do @_removeFromDevice, callback
+    bulk = @devices.initializeUnorderedBulkOp()
+    find = bulk.find query, projection
+    find.upsert().update(updateQuery)
+    bulk.execute callback
 
   down: (callback) =>
     query = { 'uuid': $exists: true }
@@ -30,9 +32,5 @@ class RemoveDeviceTokensMigration
     @devices.update { uuid }, updateQuery, (error) =>
       return callback error if error?
       @tokens.remove { uuid, hashedToken }, callback
-
-  _removeFromDevice: ({ uuid }, callback) =>
-    query = { $unset: {  'meshblu.tokens': true }}
-    @devices.update { uuid }, query, callback
 
 module.exports = RemoveDeviceTokensMigration

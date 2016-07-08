@@ -43,10 +43,7 @@ class DeviceTokensMigration
     { uuid, hashedToken } = tokenRecord
     projection = { uuid: true }
     query = { uuid, hashedToken }
-    @tokens.count query, (error, count) =>
-      return callback error if error?
-      return callback null if count
-      debug "creating token for #{uuid}"
-      @tokens.insert tokenRecord, callback
+    options = { upsert: true, multi: true }
+    @tokens.update query, { $set: tokenRecord }, options, callback
 
 module.exports = DeviceTokensMigration
