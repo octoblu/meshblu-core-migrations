@@ -27,7 +27,7 @@ class MongoForEach
         return callback null unless record?
         { uuid, meshblu } = record
         tokensCount = _.size _.keys _.get(record, 'meshblu.tokens')
-        overviewDebug "#{n} / #{@count} -- starting #{uuid} - #{tokensCount}" if n % 10 == 0
+        overviewDebug "#{n} / #{@count} -- starting #{uuid} - #{tokensCount}" if n % 10 == 0 || tokensCount > 10
         iterator record, (error) =>
           return @_handleError error, callback if error?
           overviewDebug "#{n} / #{@count} -- done with #{uuid}" if n % 10 == 0
