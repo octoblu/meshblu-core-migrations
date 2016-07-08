@@ -15,6 +15,7 @@ class MongoForEach
     @cursor.sort options
 
   do: (iterator, callback) =>
+    @n = 0
     @cursor.count (error, @count) =>
       return callback error if error?
       overviewDebug 'found count', @count
@@ -22,11 +23,14 @@ class MongoForEach
       mongoEach @cursor, { concurrency: 10 }, @_handleRecord(iterator), callback
 
   _handleRecord: (iterator) =>
+    n = 0
     return (record, callback) =>
       return callback null unless record?
+      n++
       { uuid, meshblu } = record
       tokensCount = _.size _.keys _.get(record, 'meshblu.tokens')
-      overviewDebug "#{@count} -- starting #{uuid} - #{tokensCount}" if tokensCount > 10
+      overviewDebug "processing #{n} / #{@count}" if n % 10 == 0
+      overviewDebug "#{uuid} has a lot of tokens (#{tokensCount})" if tokensCount > 10
       iterator record, callback
 
 module.exports = MongoForEach
