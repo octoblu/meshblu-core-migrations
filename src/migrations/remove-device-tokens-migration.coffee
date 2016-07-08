@@ -11,13 +11,15 @@ class RemoveDeviceTokensMigration
     query = { 'meshblu.tokens': $exists: true }
     projection = { uuid: true, 'meshblu': true, token: true }
 
-    mongoForEach = new MongoForEach({ collection: @devices, taskFn: @_removeFromDevice })
-    mongoForEach.do query, projection, callback
+    mongoForEach = new MongoForEach({ collection: @devices })
+    mongoForEach.find query, projection
+    mongoForEach.do @_removeFromDevice, callback
 
   down: (callback) =>
     query = { 'uuid': $exists: true }
-    mongoForEach = new MongoForEach({ collection: @tokens, taskFn: @_revertFromToken })
-    mongoForEach.do query, { _id: false }, callback
+    mongoForEach = new MongoForEach({ collection: @tokens })
+    mongoForEach.find query, { _id: false }
+    mongoForEach.do @_revertFromToken, callback
 
   _revertFromToken: ({ uuid, hashedToken, metadata }, callback) =>
     updateQuery = {
