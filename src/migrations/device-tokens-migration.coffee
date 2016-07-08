@@ -16,6 +16,7 @@ class DeviceTokensMigration
 
       mongoForEach = new MongoForEach({ collection: @devices })
       mongoForEach.find query, projection
+      mongoForEach.sort { _id: -1 }
       mongoForEach.do @_convertDevice, callback
 
   down: (callback) =>

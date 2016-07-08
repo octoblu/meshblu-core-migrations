@@ -9,6 +9,9 @@ class MongoForEach
     @cursor = @collection.find query, projection
     @cursor.limit(0)
 
+  sort: (options) =>
+    @cursor.sort options
+
   do: (iterator, callback) =>
     @cursor.count (error, count) =>
       return callback error if error?
