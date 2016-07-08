@@ -20,7 +20,7 @@ class DeviceTokensMigration
       mongoForEach.do @_convertDevice, callback
 
   down: (callback) =>
-    callback new Error 'down not supported'
+    callback new Error "down not supported, you probably meant to run 'remove-device-tokens'"
 
   _convertDevice: ({ uuid, meshblu }, callback) =>
     debug "converting device #{uuid}", callback
