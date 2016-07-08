@@ -1,7 +1,7 @@
-colors     = require 'colors'
-dashdash   = require 'dashdash'
-mongojs    = require 'mongojs'
-migrations = require './src/migrations'
+colors          = require 'colors'
+dashdash        = require 'dashdash'
+mongojs         = require 'mongojs'
+migrations      = require './src/migrations'
 
 OPTIONS = [
   {
@@ -57,9 +57,10 @@ class CommandUp
   run: =>
     {mongodb_uri, name} = @getOpts()
     database = mongojs mongodb_uri
+    mongodb =
     Migration = migrations[name]
     @fatalMessage "Invalid Migration #{name}" unless Migration?
-    migration = new Migration {database}
+    migration = new Migration {database, mongodb}
     migration.up (error) =>
       @fatalError error if error?
       console.log colors.green 'it has been done'

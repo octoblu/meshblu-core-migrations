@@ -4,9 +4,9 @@ debug        = require('debug')('meshblu-core-migrations:device-tokens')
 MongoForEach = require '../helpers/mongo-for-each'
 
 class DeviceTokensMigration
-  constructor: ({ database }) ->
-    @devices = database.collection 'devices'
-    @tokens = database.collection 'tokens'
+  constructor: ({ @database }) ->
+    @devices = @database.collection 'devices'
+    @tokens = @database.collection 'tokens'
 
   up: (callback) =>
     @tokens.ensureIndex { uuid: -1, hashedToken: -1 }, (error) =>
@@ -14,10 +14,13 @@ class DeviceTokensMigration
       query = { 'meshblu.tokens': { $gt: {} } }
       projection = { uuid: true, 'meshblu': true, token: true }
 
-      mongoForEach = new MongoForEach({ collection: @devices })
-      mongoForEach.find query, projection
-      mongoForEach.sort { _id: -1 }
-      mongoForEach.do @_convertDevice, callback
+      @database._getConnection (error, db) =>
+        return callback error if error?
+        collection = db.collection('devices')
+        mongoForEach = new MongoForEach({ collection })
+        mongoForEach.find query, projection
+        mongoForEach.sort { _id: -1 }
+        mongoForEach.do @_convertDevice, callback
 
   down: (callback) =>
     callback new Error "down not supported, you probably meant to run 'remove-device-tokens'"

@@ -3,9 +3,9 @@ async        = require 'async'
 MongoForEach = require '../helpers/mongo-for-each'
 
 class RemoveDeviceTokensMigration
-  constructor: ({ database }) ->
-    @devices = database.collection 'devices'
-    @tokens = database.collection 'tokens'
+  constructor: ({ @database }) ->
+    @devices = @database.collection 'devices'
+    @tokens = @database.collection 'tokens'
 
   up: (callback) =>
     query = { 'meshblu.tokens': { $gt: {} } }
@@ -19,9 +19,12 @@ class RemoveDeviceTokensMigration
 
   down: (callback) =>
     query = { 'uuid': $exists: true }
-    mongoForEach = new MongoForEach({ collection: @tokens })
-    mongoForEach.find query, { _id: false }
-    mongoForEach.do @_revertFromToken, callback
+    @database._getConnection (error, db) =>
+      return callback error if error?
+      collection = db.collection('tokens')
+      mongoForEach = new MongoForEach({ collection })
+      mongoForEach.find query, { _id: false }
+      mongoForEach.do @_revertFromToken, callback
 
   _revertFromToken: ({ uuid, hashedToken, metadata }, callback) =>
     updateQuery = {

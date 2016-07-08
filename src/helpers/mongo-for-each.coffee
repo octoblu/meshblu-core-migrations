@@ -1,10 +1,11 @@
-_     = require 'lodash'
-async = require 'async'
-debug = require('debug')('meshblu-core-migrations:mongo-for-each')
+_             = require 'lodash'
+async         = require 'async'
+mongoEach     = require 'mongo-each'
+debug         = require('debug')('meshblu-core-migrations:mongo-for-each')
 overviewDebug = require('debug')('meshblu-core-migrations:overview')
 
 class MongoForEach
-  constructor: ({ @collection }) ->
+  constructor: ({ @collection, @parallel }) ->
 
   find: (query={}, projection) =>
     @cursor = @collection.find query, projection
@@ -18,25 +19,14 @@ class MongoForEach
       return callback error if error?
       overviewDebug 'found count', @count
       return callback new Error('Nothing found') unless @count
-      async.timesSeries @count, @_handleRecord(iterator), callback
+      mongoEach @cursor, { concurrency: 10 }, @_handleRecord(iterator), callback
 
   _handleRecord: (iterator) =>
-    return (n, callback) =>
-      @cursor.next (error, record) =>
-        return @_handleError error, callback if error?
-        return callback null unless record?
-        { uuid, meshblu } = record
-        tokensCount = _.size _.keys _.get(record, 'meshblu.tokens')
-        overviewDebug "#{n} / #{@count} -- starting #{uuid} - #{tokensCount}" if n % 10 == 0 || tokensCount > 10
-        iterator record, (error) =>
-          return @_handleError error, callback if error?
-          overviewDebug "#{n} / #{@count} -- done with #{uuid}" if n % 10 == 0
-          callback null
-
-  _handleError: (error, callback) =>
-    console.error 'error', error
-    @cursor.destory()
-    @queue.kill()
-    callback error
+    return (record, callback) =>
+      return callback null unless record?
+      { uuid, meshblu } = record
+      tokensCount = _.size _.keys _.get(record, 'meshblu.tokens')
+      overviewDebug "#{@count} -- starting #{uuid} - #{tokensCount}" if tokensCount > 10
+      iterator record, callback
 
 module.exports = MongoForEach
