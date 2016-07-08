@@ -8,7 +8,7 @@ class RemoveDeviceTokensMigration
     @tokens = database.collection 'tokens'
 
   up: (callback) =>
-    query = { 'meshblu.tokens': $exists: true }
+    query = { 'meshblu.tokens': { $gt: {} } }
     projection = { uuid: true, 'meshblu': true, token: true }
     updateQuery = { $unset: {  'meshblu.tokens': true }}
 

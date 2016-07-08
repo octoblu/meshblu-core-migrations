@@ -1,5 +1,18 @@
 [
   {
+    uuid: 'ingore-this'
+    token: 'this-should-still-exist'
+    meshblu:
+      createdAt: 'Tue Jul 05 2001 23:13:19 GMT-0700 (MST)'
+      tokens: {}
+  }
+  {
+    uuid: 'ingore-this-too'
+    token: 'this-should-still-exist'
+    meshblu:
+      createdAt: 'Tue Jul 05 2001 23:13:19 GMT-0700 (MST)'
+  }
+  {
     uuid: 'hello'
     token: 'this-should-exist'
     meshblu:

@@ -11,7 +11,7 @@ class DeviceTokensMigration
   up: (callback) =>
     @tokens.ensureIndex { uuid: -1, hashedToken: -1 }, (error) =>
       return callback error if error?
-      query = { 'meshblu.tokens': $exists: true }
+      query = { 'meshblu.tokens': { $gt: {} } }
       projection = { uuid: true, 'meshblu': true, token: true }
 
       mongoForEach = new MongoForEach({ collection: @devices })
@@ -23,7 +23,7 @@ class DeviceTokensMigration
     callback new Error "down not supported, you probably meant to run 'remove-device-tokens'"
 
   _convertDevice: ({ uuid, meshblu }, callback) =>
-    debug "converting device #{uuid}", callback
+    debug "converting device #{uuid}"
     { tokens, createdAt }= meshblu
     newTokens = []
     _.each tokens, (metadata, hashedToken) =>
