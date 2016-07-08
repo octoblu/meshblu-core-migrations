@@ -14,7 +14,7 @@ class RemoveDeviceTokensMigration
 
     bulk = @devices.initializeUnorderedBulkOp()
     find = bulk.find query, projection
-    find.upsert().update(updateQuery)
+    find.update(updateQuery)
     bulk.execute callback
 
   down: (callback) =>
